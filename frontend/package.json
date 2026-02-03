@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev",
-    "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css",
+    "build:css": "tailwindcss -i ./src/styles/globals.css -o ./dist/output.css",
     "build": "npm run build:css && next build",
     "start": "next start -H 0.0.0.0 -p 3000"
   },
