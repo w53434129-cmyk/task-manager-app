@@ -16,7 +16,7 @@ spec:
       containers:
       - name: backend
         image: localhost:5000/backend:latest
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
 
