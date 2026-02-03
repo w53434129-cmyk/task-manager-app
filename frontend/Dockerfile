@@ -34,4 +34,5 @@ COPY --from=builder /app/src ./src
 EXPOSE 3000
 
 # Start Next.js server
-CMD ["npx", "next", "start", "-p", "3000"]
+CMD ["npx", "next", "start", "-p", "3000", "-H", "0.0.0.0"]
+
