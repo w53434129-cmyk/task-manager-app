@@ -8,11 +8,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy all source code
+# Copy all source code (including styles)
 COPY . .
-
-# Ensure /public exists (needed if empty)
-RUN mkdir -p public && touch public/.gitkeep
 
 # Build Next.js (Tailwind CSS compiled here)
 RUN npm run build
@@ -23,12 +20,15 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 
-# Copy built files from builder
+# Install production dependencies
+COPY package*.json ./
+RUN npm install --production
+
+# Copy built app from builder
 COPY --from=builder /app/.next .next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
 
