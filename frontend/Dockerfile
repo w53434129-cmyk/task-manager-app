@@ -8,13 +8,13 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy all source code
+# Copy all source code AND ensure public exists in same step
 COPY . .
 
-# Ensure public folder exists for production stage
-RUN mkdir -p public && touch public/.gitkeep
+# Ensure public folder exists before build
+RUN mkdir -p public
 
-# Build Next.js (Tailwind CSS compiled here)
+# Build Next.js
 RUN npm run build
 
 # =====================
@@ -29,7 +29,7 @@ RUN npm install --production
 
 # Copy compiled app from builder
 COPY --from=builder /app/.next .next
-COPY --from=builder /app/public ./public       # now /public always exists
+COPY --from=builder /app/public ./public       # now guaranteed to exist
 COPY --from=builder /app/next.config.js ./next.config.js
 COPY --from=builder /app/node_modules ./node_modules
 
