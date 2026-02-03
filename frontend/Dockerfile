@@ -11,7 +11,7 @@ RUN npm install
 # Copy all source code
 COPY . .
 
-# Ensure /public exists for Docker build, add .gitkeep if empty
+# Ensure /public exists (needed if empty)
 RUN mkdir -p public && touch public/.gitkeep
 
 # Build Next.js (Tailwind CSS compiled here)
@@ -23,18 +23,14 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 
-# Production dependencies only
-COPY package*.json ./
-RUN npm install --production
-
-# Copy compiled app from builder
+# Copy built files from builder
 COPY --from=builder /app/.next .next
-COPY --from=builder /app/next.config.js ./next.config.js
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-
-# Note: /public is already handled in .next, copying is optional
-# If you want static files, uncomment:
-# COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.js ./
 
 EXPOSE 3000
-CMD ["npm", "start"]
+
+# Start Next.js server
+CMD ["npx", "next", "start", "-p", "3000"]
