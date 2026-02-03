@@ -1,34 +1,34 @@
-# backend-deployment.yaml
+# frontend-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: frontend
   template:
     metadata:
       labels:
-        app: backend
+        app: frontend
     spec:
       containers:
-      - name: backend
-        image: <dockerhub-username>/backend:latest
+      - name: frontend
+        image: <dockerhub-username>/frontend:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: frontend-service
 spec:
   type: NodePort
   selector:
-    app: backend
+    app: frontend
   ports:
-    - port: 8080
-      targetPort: 8080
-      nodePort: 30081
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30080
