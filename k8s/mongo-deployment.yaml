@@ -1,3 +1,4 @@
+# mongo-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,9 +15,16 @@ spec:
     spec:
       containers:
       - name: mongo
-        image: mongo:7
+        image: mongo:6.0
         ports:
         - containerPort: 27017
+        volumeMounts:
+        - mountPath: /data/db
+          name: mongo-pv
+      volumes:
+      - name: mongo-pv
+        emptyDir: {}
+
 ---
 apiVersion: v1
 kind: Service
