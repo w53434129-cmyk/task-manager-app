@@ -1,4 +1,3 @@
-# frontend-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,11 +13,15 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: frontend
-        image: frontend:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 3000
+        - name: frontend
+          image: frontend:latest   # Local image built by Jenkins
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          # Optional: Add env vars if needed
+          # env:
+          #   - name: API_URL
+          #     value: "http://backend-service:8080"
 
 ---
 apiVersion: v1
@@ -30,6 +33,6 @@ spec:
   selector:
     app: frontend
   ports:
-    - port: 3000
-      targetPort: 3000
-      nodePort: 30080
+    - port: 3000          # Internal port inside pod
+      targetPort: 3000    # Same as containerPort
+      nodePort: 30080     # Accessible externally via NodePort
