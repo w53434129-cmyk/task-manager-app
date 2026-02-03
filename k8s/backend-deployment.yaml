@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: <dockerhub-username>/backend:latest
+        image: backend:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8080
 
