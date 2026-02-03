@@ -20,7 +20,7 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 
-# Install production dependencies
+# Install only production dependencies
 COPY package*.json ./
 RUN npm install --production
 
@@ -33,5 +33,5 @@ COPY --from=builder /app/node_modules ./node_modules
 # Expose port
 EXPOSE 3000
 
-# Start Next.js server bound to 0.0.0.0 so it's accessible externally
-CMD ["npx", "next", "start", "-p", "3000", "-H", "0.0.0.0"]
+# Start Next.js standalone server
+CMD ["node", ".next/standalone/server.js"]
