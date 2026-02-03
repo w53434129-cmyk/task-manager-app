@@ -16,7 +16,7 @@ spec:
       containers:
       - name: frontend
         image: localhost:5000/frontend:latest
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
 
