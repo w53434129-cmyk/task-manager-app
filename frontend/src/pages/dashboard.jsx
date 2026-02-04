@@ -7,6 +7,7 @@ export default function Dashboard() {
   const [newTask, setNewTask] = useState({ title: "", description: "", status: "Todo" });
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
+  // Fetch tasks from backend
   useEffect(() => {
     const fetchTasks = async () => {
       if (!token) return;
@@ -20,6 +21,7 @@ export default function Dashboard() {
     fetchTasks();
   }, [token]);
 
+  // Add task
   const addTask = async () => {
     if (!newTask.title.trim()) return;
     try {
@@ -31,6 +33,7 @@ export default function Dashboard() {
     }
   };
 
+  // Delete task
   const deleteTaskById = async (id) => {
     try {
       await deleteTask(id, token);
@@ -40,6 +43,7 @@ export default function Dashboard() {
     }
   };
 
+  // Update task
   const updateTaskById = async (id, updatedTask) => {
     try {
       const updated = await updateTask(id, updatedTask, token);
@@ -132,7 +136,7 @@ export default function Dashboard() {
   );
 }
 
-// Task Card with professional status indicator
+// TaskCard simplified: shows status text only
 function TaskCard({ task, deleteTask, updateTask }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState({
@@ -145,19 +149,6 @@ function TaskCard({ task, deleteTask, updateTask }) {
     if (!editedTask.title.trim()) return;
     updateTask(task.id, editedTask);
     setIsEditing(false);
-  };
-
-  // Status colors
-  const statusStyles = {
-    Todo: "bg-blue-100 text-blue-800",
-    "In Progress": "bg-yellow-100 text-yellow-800",
-    Done: "bg-green-100 text-green-800",
-  };
-
-  const statusDotColors = {
-    Todo: "#3B82F6",
-    "In Progress": "#FBBF24",
-    Done: "#22C55E",
   };
 
   return (
@@ -206,17 +197,8 @@ function TaskCard({ task, deleteTask, updateTask }) {
             <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title}</h3>
             <p className="text-gray-600 mb-2">{task.description}</p>
 
-            {/* Professional status indicator */}
-            <div className="flex items-center gap-3 mt-2">
-              <motion.div
-                className="w-2 h-6 rounded-full shadow-md"
-                animate={{ backgroundColor: statusDotColors[task.status] }}
-                transition={{ duration: 0.3 }}
-              ></motion.div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyles[task.status]}`}>
-                {task.status}
-              </span>
-            </div>
+            {/* Status text aligned under description */}
+            <p className="text-gray-700 font-medium text-sm mt-1">{task.status}</p>
           </div>
 
           <div className="flex justify-end gap-2 mt-3">
