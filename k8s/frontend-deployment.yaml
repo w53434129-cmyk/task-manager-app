@@ -15,7 +15,7 @@ spec:
       containers:
         - name: frontend
           image: frontend:latest   # Local image built by Jenkins
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000
           # Optional: Add env vars if needed
