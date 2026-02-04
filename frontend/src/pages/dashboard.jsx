@@ -1,81 +1,166 @@
-// src/pages/dashboard.jsx
 import { useState } from "react";
-import { login } from "../utils/api"; // your api.js
-import TaskList from "../components/TaskList";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function Dashboard() {
-  const [token, setToken] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function TaskList() {
+  const [tasks, setTasks] = useState([]); // start empty
+  const [newTask, setNewTask] = useState({ title: "", description: "" });
 
-  const handleLogin = async () => {
-    if (!email || !password) return alert("Please enter email and password");
-    try {
-      setLoading(true);
-      const res = await login(email, password);
-      if (res.token) {
-        setToken(res.token); // store JWT for TaskList
-      } else {
-        alert(res.message || "Login failed");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      alert("Login failed, check console");
-    } finally {
-      setLoading(false);
-    }
+  // Add task
+  const addTask = () => {
+    if (!newTask.title.trim()) return;
+    setTasks([
+      ...tasks,
+      { id: Date.now(), title: newTask.title.trim(), description: newTask.description.trim() },
+    ]);
+    setNewTask({ title: "", description: "" });
   };
 
-  // If user is not logged in, show login form
-  if (!token) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold text-blue-600 mb-6 text-center">
-          Login
-        </h1>
+  // Delete task
+  const deleteTask = (id) => setTasks(tasks.filter((task) => task.id !== id));
 
-        <div className="w-full max-w-md p-6 bg-white rounded-xl shadow-md flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-          />
-          <button
-            onClick={handleLogin}
-            className={`w-full py-3 rounded-lg text-white font-semibold transition transform ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Update task
+  const updateTask = (id, updatedTask) =>
+    setTasks(tasks.map((task) => (task.id === id ? { ...task, ...updatedTask } : task)));
 
-  // Logged in → show TaskList
   return (
-    <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
-      <h1 className="text-4xl font-bold text-blue-600 mb-6 text-center">
-        Dashboard
-      </h1>
-
-      <div className="w-full max-w-6xl">
-        <TaskList token={token} />
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Add Task Form */}
+      <div className="mb-8 p-6 bg-white rounded-xl shadow-md flex flex-col md:flex-row gap-4 items-center">
+        <input
+          type="text"
+          value={newTask.title}
+          onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+          placeholder="Task Name"
+          className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
+        />
+        <input
+          type="text"
+          value={newTask.description}
+          onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+          placeholder="Description"
+          className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
+        />
+        <button
+          onClick={addTask}
+          className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md transform hover:scale-105 transition"
+        >
+          Add Task
+        </button>
       </div>
+
+      {/* Empty State */}
+      {tasks.length === 0 ? (
+        <div className="flex flex-col justify-center items-center h-96 space-y-4 text-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-20 w-20 text-gray-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V6a2 2 0 012-2h4l2-2 2 2h4a2 2 0 012 2v12a2 2 0 01-2 2z"
+            />
+          </svg>
+          <h2 className="text-2xl font-semibold text-gray-700">No tasks yet</h2>
+          <p className="text-gray-400 max-w-xs">
+            Your task list is empty. Start by adding your first task using the form above.
+          </p>
+          <p className="text-gradientBlue font-medium">Add your first task now!</p>
+        </div>
+      ) : (
+        // Tasks Grid with animation
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence>
+            {tasks.map((task) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <TaskCard
+                  task={task}
+                  deleteTask={deleteTask}
+                  updateTask={updateTask}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Individual Task Card
+function TaskCard({ task, deleteTask, updateTask }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTask, setEditedTask] = useState({ title: task.title, description: task.description });
+
+  const save = () => {
+    if (!editedTask.title.trim()) return;
+    updateTask(task.id, editedTask);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-5 flex flex-col justify-between hover:shadow-2xl transition transform hover:-translate-y-1">
+      {isEditing ? (
+        <div className="flex flex-col gap-3">
+          <input
+            type="text"
+            value={editedTask.title}
+            onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
+          />
+          <textarea
+            value={editedTask.description}
+            onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
+            rows={3}
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={save}
+              className="bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white px-3 py-1 rounded-lg shadow-md transform hover:scale-105 transition"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => setIsEditing(false)}
+              className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-lg transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col justify-between h-full">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title}</h3>
+            <p className="text-gray-600 mb-4">{task.description}</p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg shadow-sm transition transform hover:scale-105"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => deleteTask(task.id)}
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg shadow-sm transition transform hover:scale-105"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
