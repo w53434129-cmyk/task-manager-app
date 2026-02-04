@@ -4,21 +4,42 @@ import { useState } from "react";
 export default function LoginForm({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const data = await login(email, password);
+    if (!email || !password) {
+      alert("Please enter email and password");
+      return;
+    }
 
-    if (data.token) {
-      onLogin(data.token);
-    } else {
-      alert("Invalid credentials");
+    setLoading(true);
+
+    try {
+      const data = await login(email, password);
+      console.log("Login response:", data); // 👈 see response in browser console
+
+      if (data.token) {
+        onLogin(data.token);
+      } else if (data.error) {
+        alert("Login failed: " + data.error);
+      } else {
+        alert("Invalid credentials");
+      }
+    } catch (err) {
+      console.error("Login request failed:", err);
+      alert("Login request failed. Check console for details.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
+    >
       <h1 className="text-2xl font-bold text-center mb-6 text-blue-600">Login</h1>
 
       <input
@@ -39,8 +60,12 @@ export default function LoginForm({ onLogin }) {
         required
       />
 
-      <button className="w-full bg-blue-500 text-white p-2 rounded">
-        Login
+      <button
+        type="submit"
+        className={`w-full p-2 rounded text-white ${loading ? "bg-gray-400" : "bg-blue-500"}`}
+        disabled={loading}
+      >
+        {loading ? "Logging in..." : "Login"}
       </button>
     </form>
   );
