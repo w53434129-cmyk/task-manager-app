@@ -11,7 +11,7 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build Next.js (Tailwind CSS compiled automatically)
+# Build Next.js
 RUN npm run build
 
 # =====================
@@ -24,14 +24,15 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
 
-# Copy built app from builder
+# Copy built app and static files
 COPY --from=builder /app/.next .next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/package.json ./
 
 # Expose port
 EXPOSE 3000
 
-# Start Next.js standalone server
-CMD ["node", ".next/standalone/server.js"]
+# Start server
+CMD ["npm", "start"]
