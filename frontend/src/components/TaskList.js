@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function TaskList() {
   const [tasks, setTasks] = useState([]); // start empty
@@ -22,26 +23,26 @@ export default function TaskList() {
     setTasks(tasks.map((task) => (task.id === id ? { ...task, ...updatedTask } : task)));
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-6">
       {/* Add Task Form */}
-      <div className="mb-8 p-6 bg-white rounded-lg shadow flex flex-col md:flex-row gap-4 items-center">
+      <div className="mb-8 p-6 bg-white rounded-xl shadow-md flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
           value={newTask.title}
           onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
           placeholder="Task Name"
-          className="flex-1 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
         />
         <input
           type="text"
           value={newTask.description}
           onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
           placeholder="Description"
-          className="flex-1 p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
         />
         <button
           onClick={addTask}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded transition"
+          className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md transform hover:scale-105 transition"
         >
           Add Task
         </button>
@@ -68,26 +69,35 @@ export default function TaskList() {
           <p className="text-gray-400 max-w-xs">
             Your task list is empty. Start by adding your first task using the form above.
           </p>
-          <p className="text-blue-600 font-medium">Add your first task now!</p>
+          <p className="text-gradientBlue font-medium">Add your first task now!</p>
         </div>
       ) : (
-        // Tasks Grid
+        // Tasks Grid with animation
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              deleteTask={deleteTask}
-              updateTask={updateTask}
-            />
-          ))}
+          <AnimatePresence>
+            {tasks.map((task) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <TaskCard
+                  task={task}
+                  deleteTask={deleteTask}
+                  updateTask={updateTask}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </div>
   );
 }
 
-// Task Card Component
+// Individual Task Card
 function TaskCard({ task, deleteTask, updateTask }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState({ title: task.title, description: task.description });
@@ -99,31 +109,31 @@ function TaskCard({ task, deleteTask, updateTask }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-xl transition p-5 flex flex-col justify-between">
+    <div className="bg-white rounded-xl shadow-lg p-5 flex flex-col justify-between hover:shadow-2xl transition transform hover:-translate-y-1">
       {isEditing ? (
         <div className="flex flex-col gap-3">
           <input
             type="text"
             value={editedTask.title}
             onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
-            className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
           />
           <textarea
             value={editedTask.description}
             onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
-            className="p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
             rows={3}
           />
           <div className="flex justify-end gap-2">
             <button
               onClick={save}
-              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded transition"
+              className="bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white px-3 py-1 rounded-lg shadow-md transform hover:scale-105 transition"
             >
               Save
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded transition"
+              className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-lg transition"
             >
               Cancel
             </button>
@@ -138,13 +148,13 @@ function TaskCard({ task, deleteTask, updateTask }) {
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setIsEditing(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded transition"
+              className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg shadow-sm transition transform hover:scale-105"
             >
               Edit
             </button>
             <button
               onClick={() => deleteTask(task.id)}
-              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition"
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg shadow-sm transition transform hover:scale-105"
             >
               Delete
             </button>
