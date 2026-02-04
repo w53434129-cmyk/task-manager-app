@@ -1,7 +1,7 @@
 // TaskList.js
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getTasks, createTask } from "./api"; // your api.js
+import { getTasks, createTask } from "../utils/api"; // your api.js
 
 export default function TaskList({ token }) {
   const [tasks, setTasks] = useState([]);
