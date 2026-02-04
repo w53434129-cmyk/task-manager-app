@@ -13,7 +13,9 @@ export default function Dashboard() {
       if (!token) return;
       try {
         const data = await getTasks(token);
-        setTasks(data);
+        // Normalize all tasks to have .id (fallback for _id)
+        const normalized = data.map((t) => ({ ...t, id: t.id || t._id }));
+        setTasks(normalized);
       } catch (err) {
         console.error("Error fetching tasks:", err);
       }
@@ -26,8 +28,8 @@ export default function Dashboard() {
     if (!newTask.title.trim()) return;
     try {
       const created = await createTask(newTask, token);
-      // Update tasks state so new task shows immediately
-      setTasks([...tasks, created]);
+      const normalized = { ...created, id: created.id || created._id };
+      setTasks([...tasks, normalized]);
       setNewTask({ title: "", description: "", status: "Todo" });
     } catch (err) {
       console.error("Error creating task:", err);
@@ -48,7 +50,8 @@ export default function Dashboard() {
   const updateTaskById = async (id, updatedTask) => {
     try {
       const updated = await updateTask(id, updatedTask, token);
-      setTasks(tasks.map((task) => (task.id === id ? updated : task)));
+      const normalized = { ...updated, id: updated.id || updated._id };
+      setTasks(tasks.map((task) => (task.id === normalized.id ? normalized : task)));
     } catch (err) {
       console.error("Error updating task:", err);
     }
@@ -56,10 +59,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Dashboard title */}
-      <h1 className="text-4xl font-bold text-blue-600 mb-6 text-center">
-        Dashboard
-      </h1>
+      <h1 className="text-4xl font-bold text-blue-600 mb-6 text-center">Dashboard</h1>
 
       {/* Add Task Form */}
       <div className="mb-8 p-6 bg-white rounded-xl shadow-md flex flex-col md:flex-row gap-4 items-center">
@@ -94,7 +94,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Task List / Empty State */}
+      {/* Task List */}
       {tasks.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-96 space-y-4 text-center">
           <svg
@@ -142,7 +142,7 @@ export default function Dashboard() {
   );
 }
 
-// TaskCard: title, description, status text
+// TaskCard component
 function TaskCard({ task, deleteTask, updateTask }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState({
@@ -166,14 +166,12 @@ function TaskCard({ task, deleteTask, updateTask }) {
             value={editedTask.title}
             onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
             className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
-            placeholder="Title"
           />
           <textarea
             value={editedTask.description}
             onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
             className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
             rows={3}
-            placeholder="Description"
           />
           <select
             value={editedTask.status}
@@ -205,7 +203,7 @@ function TaskCard({ task, deleteTask, updateTask }) {
             <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title || "No Title"}</h3>
             <p className="text-gray-600 mb-2">{task.description || "No Description"}</p>
 
-            {/* Status text aligned under description */}
+            {/* Correct status display */}
             <p className="text-gray-700 font-medium text-sm mt-1">
               Status: {task.status || "Todo"}
             </p>
