@@ -24,7 +24,7 @@ spec:
       volumes:
       - name: mongo-pv
         persistentVolumeClaim:
-          claimName: mongo-pvc
+          claimName: mongo-pvc   # <- This must match your PVC
 ---
 apiVersion: v1
 kind: Service
