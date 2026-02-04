@@ -1,13 +1,8 @@
 import { useState } from "react";
 
 export default function TaskList() {
-  // State for tasks
-  const [tasks, setTasks] = useState([
-    // Initial tasks (optional)
-    { id: 1, title: "Task 1", description: "Description 1" },
-    { id: 2, title: "Task 2", description: "Description 2" },
-    { id: 3, title: "Task 3", description: "Description 3" },
-  ]);
+  // Start with empty tasks array
+  const [tasks, setTasks] = useState([]);
 
   // State for new task input
   const [newTask, setNewTask] = useState({ title: "", description: "" });
@@ -58,17 +53,21 @@ export default function TaskList() {
         </button>
       </div>
 
-      {/* Task cards grid (3 per row) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            deleteTask={deleteTask}
-            updateTask={updateTask}
-          />
-        ))}
-      </div>
+      {/* Message if no tasks */}
+      {tasks.length === 0 ? (
+        <p className="text-gray-500">No tasks yet. Add your first task above!</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {tasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              deleteTask={deleteTask}
+              updateTask={updateTask}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
