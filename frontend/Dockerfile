@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy source code
+# Copy all source files
 COPY . .
 
 # Build Next.js
@@ -24,12 +24,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
 
-# Copy built app and static files
+# Copy built app and static files from builder
 COPY --from=builder /app/.next .next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/package.json ./
+COPY --from=builder /app/next.config.js ./
 
 # Expose port
 EXPOSE 3000
