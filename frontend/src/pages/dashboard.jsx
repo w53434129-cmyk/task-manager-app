@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getTasks, createTask, updateTask, deleteTask } from "../utils/api";
 
-export default function TaskList() {
+export default function Dashboard() {
   const [tasks, setTasks] = useState([]); // tasks from backend
-  const [newTask, setNewTask] = useState({ title: "", description: "" });
+  const [newTask, setNewTask] = useState({ title: "", description: "", status: "Todo" });
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   // Fetch tasks from backend on component mount
@@ -26,8 +26,8 @@ export default function TaskList() {
     if (!newTask.title.trim()) return;
     try {
       const created = await createTask(newTask, token);
-      setTasks([...tasks, created]); // update state with backend task
-      setNewTask({ title: "", description: "" });
+      setTasks([...tasks, created]);
+      setNewTask({ title: "", description: "", status: "Todo" });
     } catch (err) {
       console.error("Error creating task:", err);
     }
@@ -71,6 +71,15 @@ export default function TaskList() {
           placeholder="Description"
           className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
         />
+        <select
+          value={newTask.status}
+          onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
+          className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
+        >
+          <option>Todo</option>
+          <option>In Progress</option>
+          <option>Done</option>
+        </select>
         <button
           onClick={addTask}
           className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md transform hover:scale-105 transition"
@@ -103,7 +112,6 @@ export default function TaskList() {
           <p className="text-gradientBlue font-medium">Add your first task now!</p>
         </div>
       ) : (
-        // Tasks Grid with animation
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
             {tasks.map((task) => (
@@ -131,7 +139,11 @@ export default function TaskList() {
 // Individual Task Card
 function TaskCard({ task, deleteTask, updateTask }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTask, setEditedTask] = useState({ title: task.title, description: task.description });
+  const [editedTask, setEditedTask] = useState({
+    title: task.title,
+    description: task.description,
+    status: task.status || "Todo",
+  });
 
   const save = () => {
     if (!editedTask.title.trim()) return;
@@ -155,6 +167,15 @@ function TaskCard({ task, deleteTask, updateTask }) {
             className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
             rows={3}
           />
+          <select
+            value={editedTask.status}
+            onChange={(e) => setEditedTask({ ...editedTask, status: e.target.value })}
+            className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
+          >
+            <option>Todo</option>
+            <option>In Progress</option>
+            <option>Done</option>
+          </select>
           <div className="flex justify-end gap-2">
             <button
               onClick={save}
@@ -174,9 +195,16 @@ function TaskCard({ task, deleteTask, updateTask }) {
         <div className="flex flex-col justify-between h-full">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title}</h3>
-            <p className="text-gray-600 mb-4">{task.description}</p>
+            <p className="text-gray-600 mb-2">{task.description}</p>
+            <span className={`inline-block px-2 py-1 rounded-full text-sm font-medium ${
+              task.status === "Todo" ? "bg-blue-100 text-blue-800" :
+              task.status === "In Progress" ? "bg-yellow-100 text-yellow-800" :
+              "bg-green-100 text-green-800"
+            }`}>
+              {task.status}
+            </span>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 mt-3">
             <button
               onClick={() => setIsEditing(true)}
               className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg shadow-sm transition transform hover:scale-105"
