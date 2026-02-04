@@ -1,9 +1,10 @@
 import TaskList from '../components/TaskList';
 
 export default function Dashboard() {
-  const token = typeof window !== "undefined"
-    ? localStorage.getItem("token")
-    : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token")
+      : null;
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
