@@ -1,26 +1,55 @@
-import { useState } from "react";
+// TaskList.js
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getTasks, createTask } from "./api"; // your api.js
 
-export default function TaskList() {
-  const [tasks, setTasks] = useState([]); // start empty
+export default function TaskList({ token }) {
+  const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState({ title: "", description: "" });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch tasks on mount or when token changes
+  useEffect(() => {
+    if (!token) return;
+    const fetchTasks = async () => {
+      try {
+        setLoading(true);
+        const tasksFromBackend = await getTasks(token);
+        setTasks(tasksFromBackend);
+      } catch (err) {
+        console.error("Failed to fetch tasks:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTasks();
+  }, [token]);
 
   // Add task
-  const addTask = () => {
+  const handleAddTask = async () => {
     if (!newTask.title.trim()) return;
-    setTasks([
-      ...tasks,
-      { id: Date.now(), title: newTask.title.trim(), description: newTask.description.trim() },
-    ]);
-    setNewTask({ title: "", description: "" });
+
+    try {
+      // Save to backend
+      const createdTask = await createTask(newTask, token);
+      // Update local state
+      setTasks([...tasks, createdTask]);
+      setNewTask({ title: "", description: "" });
+    } catch (err) {
+      console.error("Failed to create task:", err);
+    }
   };
 
-  // Delete task
-  const deleteTask = (id) => setTasks(tasks.filter((task) => task.id !== id));
-
-  // Update task
+  // Delete and update tasks locally (optional: implement backend API later)
+  const deleteTask = (id) => setTasks(tasks.filter((task) => task._id !== id));
   const updateTask = (id, updatedTask) =>
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, ...updatedTask } : task)));
+    setTasks(tasks.map((task) => (task._id === id ? { ...task, ...updatedTask } : task)));
+
+  if (!token) {
+    return <p>Please log in to see your tasks.</p>;
+  }
+
+  if (loading) return <p>Loading tasks...</p>;
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -41,7 +70,7 @@ export default function TaskList() {
           className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
         />
         <button
-          onClick={addTask}
+          onClick={handleAddTask}
           className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md transform hover:scale-105 transition"
         >
           Add Task
@@ -77,17 +106,13 @@ export default function TaskList() {
           <AnimatePresence>
             {tasks.map((task) => (
               <motion.div
-                key={task.id}
+                key={task._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <TaskCard
-                  task={task}
-                  deleteTask={deleteTask}
-                  updateTask={updateTask}
-                />
+                <TaskCard task={task} deleteTask={deleteTask} updateTask={updateTask} />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -104,7 +129,7 @@ function TaskCard({ task, deleteTask, updateTask }) {
 
   const save = () => {
     if (!editedTask.title.trim()) return;
-    updateTask(task.id, editedTask);
+    updateTask(task._id, editedTask);
     setIsEditing(false);
   };
 
@@ -144,20 +169,6 @@ function TaskCard({ task, deleteTask, updateTask }) {
           <div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title}</h3>
             <p className="text-gray-600 mb-4">{task.description}</p>
-          </div>
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-lg shadow-sm transition transform hover:scale-105"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => deleteTask(task.id)}
-              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg shadow-sm transition transform hover:scale-105"
-            >
-              Delete
-            </button>
           </div>
         </div>
       )}
