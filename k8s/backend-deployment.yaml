@@ -21,7 +21,9 @@ spec:
         - containerPort: 8080
         env:
         - name: MONGO_URI
-          value: "mongodb://mongo:27017/task-manager"  # <-- Add this
+          value: "mongodb://mongo:27017/task-manager"
+        - name: JWT_SECRET
+          value: "mySuperSecretKey123"   # <-- add this line
 ---
 apiVersion: v1
 kind: Service
