@@ -1,26 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getTasks, createTask, updateTask, deleteTask } from "../utils/api";
 
 export default function TaskList() {
-  const [tasks, setTasks] = useState([]); // start empty
+  const [tasks, setTasks] = useState([]); // tasks from backend
   const [newTask, setNewTask] = useState({ title: "", description: "" });
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  // Fetch tasks from backend on component mount
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!token) return;
+      try {
+        const data = await getTasks(token);
+        setTasks(data);
+      } catch (err) {
+        console.error("Error fetching tasks:", err);
+      }
+    };
+    fetchTasks();
+  }, [token]);
 
   // Add task
-  const addTask = () => {
+  const addTask = async () => {
     if (!newTask.title.trim()) return;
-    setTasks([
-      ...tasks,
-      { id: Date.now(), title: newTask.title.trim(), description: newTask.description.trim() },
-    ]);
-    setNewTask({ title: "", description: "" });
+    try {
+      const created = await createTask(newTask, token);
+      setTasks([...tasks, created]); // update state with backend task
+      setNewTask({ title: "", description: "" });
+    } catch (err) {
+      console.error("Error creating task:", err);
+    }
   };
 
   // Delete task
-  const deleteTask = (id) => setTasks(tasks.filter((task) => task.id !== id));
+  const deleteTaskById = async (id) => {
+    try {
+      await deleteTask(id, token);
+      setTasks(tasks.filter((task) => task.id !== id));
+    } catch (err) {
+      console.error("Error deleting task:", err);
+    }
+  };
 
   // Update task
-  const updateTask = (id, updatedTask) =>
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, ...updatedTask } : task)));
+  const updateTaskById = async (id, updatedTask) => {
+    try {
+      const updated = await updateTask(id, updatedTask, token);
+      setTasks(tasks.map((task) => (task.id === id ? updated : task)));
+    } catch (err) {
+      console.error("Error updating task:", err);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -85,8 +116,8 @@ export default function TaskList() {
               >
                 <TaskCard
                   task={task}
-                  deleteTask={deleteTask}
-                  updateTask={updateTask}
+                  deleteTask={deleteTaskById}
+                  updateTask={updateTaskById}
                 />
               </motion.div>
             ))}
@@ -164,9 +195,3 @@ function TaskCard({ task, deleteTask, updateTask }) {
     </div>
   );
 }
-
-
-
-
-
-
