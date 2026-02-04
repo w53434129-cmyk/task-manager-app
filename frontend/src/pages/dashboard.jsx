@@ -26,6 +26,7 @@ export default function Dashboard() {
     if (!newTask.title.trim()) return;
     try {
       const created = await createTask(newTask, token);
+      // Update tasks state so new task shows immediately
       setTasks([...tasks, created]);
       setNewTask({ title: "", description: "", status: "Todo" });
     } catch (err) {
@@ -54,7 +55,12 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-100 p-6">
+      {/* Dashboard title */}
+      <h1 className="text-4xl font-bold text-blue-600 mb-6 text-center">
+        Dashboard
+      </h1>
+
       {/* Add Task Form */}
       <div className="mb-8 p-6 bg-white rounded-xl shadow-md flex flex-col md:flex-row gap-4 items-center">
         <input
@@ -88,7 +94,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Empty State */}
+      {/* Task List / Empty State */}
       {tasks.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-96 space-y-4 text-center">
           <svg
@@ -136,12 +142,12 @@ export default function Dashboard() {
   );
 }
 
-// TaskCard simplified: shows status text only
+// TaskCard: title, description, status text
 function TaskCard({ task, deleteTask, updateTask }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState({
-    title: task.title,
-    description: task.description,
+    title: task.title || "",
+    description: task.description || "",
     status: task.status || "Todo",
   });
 
@@ -160,12 +166,14 @@ function TaskCard({ task, deleteTask, updateTask }) {
             value={editedTask.title}
             onChange={(e) => setEditedTask({ ...editedTask, title: e.target.value })}
             className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
+            placeholder="Title"
           />
           <textarea
             value={editedTask.description}
             onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
             className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gradientBlue focus:outline-none transition"
             rows={3}
+            placeholder="Description"
           />
           <select
             value={editedTask.status}
@@ -194,11 +202,13 @@ function TaskCard({ task, deleteTask, updateTask }) {
       ) : (
         <div className="flex flex-col justify-between h-full">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title}</h3>
-            <p className="text-gray-600 mb-2">{task.description}</p>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">{task.title || "No Title"}</h3>
+            <p className="text-gray-600 mb-2">{task.description || "No Description"}</p>
 
             {/* Status text aligned under description */}
-            <p className="text-gray-700 font-medium text-sm mt-1">{task.status}</p>
+            <p className="text-gray-700 font-medium text-sm mt-1">
+              Status: {task.status || "Todo"}
+            </p>
           </div>
 
           <div className="flex justify-end gap-2 mt-3">
