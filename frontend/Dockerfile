@@ -1,7 +1,8 @@
 # =====================
 # Builder stage
 # =====================
-FROM node:20-alpine AS builder
+#FROM node:20-alpine AS builder
+FROM 732716521491.dkr.ecr.us-east-1.amazonaws.com/node-base:20-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
