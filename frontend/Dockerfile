@@ -18,7 +18,8 @@ RUN npm run build
 # =====================
 # Production stage
 # =====================
-FROM node:20-alpine
+#FROM node:20-alpine
+FROM 732716521491.dkr.ecr.us-east-1.amazonaws.com/node-base:20-alpine
 WORKDIR /app
 
 # Install only production dependencies
