@@ -7,12 +7,15 @@ phases:
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 732716521491.dkr.ecr.us-east-1.amazonaws.com
   build:
     commands:
-      - echo Building Docker image...
-      - docker build -t w53434129-cmyk .
-      - docker tag w53434129-cmyk:latest 732716521491.dkr.ecr.us-east-1.amazonaws.com/w53434129-cmyk:latest
+      - echo Building backend image...
+      - docker build -t backend ./backend
+      - docker tag backend:latest 732716521491.dkr.ecr.us-east-1.amazonaws.com/backend:latest
+      - echo Building frontend image...
+      - docker build -t frontend ./frontend
+      - docker tag frontend:latest 732716521491.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
   post_build:
     commands:
-      - echo Pushing Docker image to ECR...
-      - docker push 732716521491.dkr.ecr.us-east-1.amazonaws.com/w53434129-cmyk:latest
-artifacts:
-  files: '**/*'
+      - echo Pushing backend image...
+      - docker push 732716521491.dkr.ecr.us-east-1.amazonaws.com/backend:latest
+      - echo Pushing frontend image...
+      - docker push 732716521491.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
